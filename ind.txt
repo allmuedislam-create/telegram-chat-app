@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telegram Web Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --tg-primary: #2481cc;
+            --tg-primary-hover: #1d71b3;
+            --tg-bg: #0e1621;
+            --tg-sidebar-bg: #17212b;
+            --tg-panel-bg: #17212b;
+            --tg-border: #101921;
+            --tg-text: #f5f5f5;
+            --tg-text-muted: #7f91a4;
+            --tg-bubble-out: #2b5278;
+            --tg-bubble-in: #182533;
+            --tg-bubble-text: #f5f5f5;
+            --tg-input-bg: #24303f;
+            --tg-accent: #5288c1;
+            --tg-verified: #55aaff;
+            --tg-online: #4fbc51;
+            --tg-chat-bg: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            --tg-chat-bg-opacity: 0.06;
+        }
+
+        [data-theme="light"] {
+            --tg-bg: #f4f4f5;
+            --tg-sidebar-bg: #ffffff;
+            --tg-panel-bg: #ffffff;
+            --tg-border: #e4e4e7;
+            --tg-text: #09090b;
+            --tg-text-muted: #71717a;
+            --tg-bubble-out: #eeecf9;
+            --tg-bubble-in: #ffffff;
+            --tg-bubble-text: #09090b;
+            --tg-input-bg: #f4f4f5;
+            --tg-accent: #0088cc;
+            --tg-primary: #0088cc;
+            --tg-primary-hover: #0077b3;
+            --tg-verified: #0088cc;
+            --tg-online: #34c759;
+            --tg-chat-bg-opacity: 0.12;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--tg-bg);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--tg-sidebar-bg);
+            border: 1px solid var(--tg-border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            padding: 32px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 48px;
+            color: var(--tg-primary);
+            margin-bottom: 16px;
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: var(--tg-text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--tg-text-muted);
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--tg-input-bg);
+            border: 1px solid var(--tg-border);
+            border-radius: 8px;
+            color: var(--tg-text);
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--tg-primary);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--tg-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .auth-btn:hover {
+            background: var(--tg-primary-hover);
+        }
+
+        .auth-toggle {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--tg-accent);
+            cursor: pointer;
+        }
+
+        .sidebar {
+            width: 380px;
+            height: 100%;
+            background: var(--tg-sidebar-bg);
+            border-right: 1px solid var(--tg-border);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-bar-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            background: var(--tg-input-bg);
+            border: 1px solid transparent;
+            border-radius: 22px;
+            color: var(--tg-text);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-bar:focus {
+            border-color: var(--tg-primary);
+            background: var(--tg-sidebar-bg);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--tg-text-muted);
+            pointer-events: none;
+        }
+
+        .menu-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--tg-text-muted);
+            font-size: 18px;
+        }
+
+        .menu-btn:hover {
+            background: var(--tg-input-bg);
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .chat-item:hover {
+            background: var(--tg-input-bg);
+        }
+
+        .chat-item.active {
+            background: var(--tg-primary);
+        }
+
+        .chat-item.active .chat-item-name,
+        .chat-item.active .chat-item-msg,
+        .chat-item.active .chat-item-time,
+        .chat-item.active .chat-item-meta i {
+            color: #ffffff !important;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--tg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .avatar.online::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            background: var(--tg-online);
+            border: 2px solid var(--tg-sidebar-bg);
+            border-radius: 50%;
+        }
+
+        .chat-item-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .chat-item-name {
+            font-weight: 600;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-item-time {
+            font-size: 12px;
+            color: var(--tg-text-muted);
+        }
+
+        .chat-item-msg {
+            font-size: 14px;
+            color: var(--tg-text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--tg-bg);
+            position: relative;
+        }
+
+        .main-chat::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--tg-chat-bg);
+            opacity: var(--tg-chat-bg-opacity);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .chat-header {
+            height: 60px;
+            background: var(--tg-panel-bg);
+            border-bottom: 1px solid var(--tg-border);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .back-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .chat-header-info {
+            min-width: 0;
+        }
+
+        .chat-header-title {
+            font-weight: 600;
+            font-size: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-header-status {
+            font-size: 13px;
+            color: var(--tg-text-muted);
+        }
+
+        .chat-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1;
+        }
+
+        .message-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 2px;
+        }
+
+        .message-row.out {
+            justify-content: flex-end;
+        }
+
+        .message-row.in {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 65%;
+            padding: 8px 14px;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            group: hover;
+        }
+
+        .message-row.out .message-bubble {
+            background: var(--tg-bubble-out);
+            color: var(--tg-text);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-row.in .message-bubble {
+            background: var(--tg-bubble-in);
+            color: var(--tg-bubble-text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-media img {
+            max-width: 100%;
+            max-height: 240px;
+            border-radius: 8px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .message-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            align-self: flex-end;
+            font-size: 11px;
+            color: var(--tg-text-muted);
+            min-width: 45px;
+            margin-top: -2px;
+        }
+
+        .message-row.out .message-footer {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .message-actions {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+            cursor: pointer;
+            color: var(--tg-text-muted);
+            padding: 5px;
+        }
+
+        .message-row.in .message-actions {
+            right: auto;
+            left: -30px;
+        }
+
+        .message-bubble:hover .message-actions {
+            display: block;
+        }
+
+        .chat-input-area {
+            background: var(--tg-panel-bg);
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            border-top: 1px solid var(--tg-border);
+            z-index: 10;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            background: var(--tg-input-bg);
+            border-radius: 22px;
+            padding: 4px 6px 4px 14px;
+            display: flex;
+            align-items: flex-end;
+            min-height: 40px;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--tg-text);
+            font-size: 15px;
+            outline: none;
+            padding: 6px 0;
+            resize: none;
+            max-height: 120px;
+            height: 24px;
+        }
+
+        .input-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--tg-text-muted);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .input-action-btn:hover {
+            background: var(--tg-sidebar-bg);
+            color: var(--tg-primary);
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--tg-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover {
+            background: var(--tg-primary-hover);
+        }
+
+        .no-chat-selected {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--tg-text-muted);
+            z-index: 1;
+        }
+
+        .no-chat-bubble {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            color: white;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 14px;
+            background: var(--tg-bubble-in);
+            border-radius: 12px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--tg-text-muted);
+            border-radius: 50%;
+            animation: typingWave 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingWave {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 320px;
+            height: 100%;
+            background: var(--tg-sidebar-bg);
+            border-right: 1px solid var(--tg-border);
+            z-index: 150;
+            transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer.open {
+            left: 0;
+        }
+
+        .drawer-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 140;
+            display: none;
+        }
+
+        .drawer-backdrop.open {
+            display: block;
+        }
+
+        .drawer-header {
+            background: var(--tg-primary);
+            color: white;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .drawer-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .drawer-email {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .drawer-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--tg-text);
+        }
+
+        .drawer-menu-item:hover {
+            background: var(--tg-input-bg);
+        }
+
+        .drawer-menu-item i {
+            color: var(--tg-text-muted);
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 160;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--tg-sidebar-bg);
+            border: 1px solid var(--tg-border);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--tg-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            color: var(--tg-text-muted);
+            font-size: 18px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--tg-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .tg-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .tg-btn-link { background: transparent; color: var(--tg-accent); }
+        .tg-btn-primary { background: var(--tg-primary); color: white; }
+        .tg-btn-primary:hover { background: var(--tg-primary-hover); }
+
+        .profile-upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .avatar-edit-wrapper {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .avatar-edit-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .avatar-edit-wrapper:hover .avatar-edit-overlay {
+            opacity: 1;
+        }
+
+        #file-input, #media-input {
+            display: none;
+        }
+
+        .emoji-picker-btn {
+            position: relative;
+        }
+
+        .emoji-popover {
+            position: absolute;
+            bottom: 50px;
+            left: 0;
+            background: var(--tg-sidebar-bg);
+            border: 1px solid var(--tg-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 8px;
+            display: none;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            z-index: 100;
+            width: 220px;
+        }
+
+        .emoji-popover.open {
+            display: grid;
+        }
+
+        .emoji-item {
+            font-size: 20px;
+            cursor: pointer;
+            text-align: center;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .emoji-item:hover {
+            background: var(--tg-input-bg);
+        }
+
+        .context-menu {
+            position: fixed;
+            background: var(--tg-sidebar-bg);
+            border: 1px solid var(--tg-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 4px 0;
+            z-index: 500;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .context-menu-item:hover {
+            background: var(--tg-input-bg);
+            color: #ff4d4d;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: absolute;
+                left: 0; top: 0; height: 100%;
+            }
+            .main-chat {
+                width: 100%;
+                position: absolute;
+                left: 0; top: 0; height: 100%;
+                transform: translateX(100%);
+                transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+            }
+            .app-container.chat-open .main-chat {
+                transform: translateX(0);
+            }
+            .back-btn {
+                display: flex;
+            }
+            .message-bubble {
+                max-width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="app-viewport">
+        
+        <div class="auth-screen" id="auth-screen">
+            <div class="auth-card">
+                <div class="auth-logo"><i class="fa-brands fa-telegram"></i></div>
+                <div id="auth-view-login">
+                    <h2 class="auth-title">Sign in to Telegram</h2>
+                    <p class="auth-subtitle">Enter your details to access your account</p>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="login-email" class="form-input" placeholder="name@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" class="form-input" placeholder="••••••••">
+                    </div>
+                    <button class="auth-btn" onclick="Auth.login()">Sign In</button>
+                    <p class="auth-toggle" onclick="Auth.toggleView(false)">Create an account</p>
+                </div>
+                <div id="auth-view-register" style="display: none;">
+                    <h2 class="auth-title">Create Account</h2>
+                    <p class="auth-subtitle">Join us today to start messaging</p>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="reg-username" class="form-input" placeholder="john_doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="reg-email" class="form-input" placeholder="name@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="reg-password" class="form-input" placeholder="••••••••">
+                    </div>
+                    <button class="auth-btn" onclick="Auth.register()">Sign Up</button>
+                    <p class="auth-toggle" onclick="Auth.toggleView(true)">Already have an account?</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="menu-btn" onclick="UI.toggleDrawer(true)"><i class="fa-solid fa-bars"></i></div>
+                <div class="search-bar-container">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="user-search" class="search-bar" placeholder="Search accounts..." oninput="App.renderUserList()">
+                </div>
+            </div>
+            <div class="chat-list" id="contacts-target"></div>
+        </div>
+
+        <div class="main-chat">
+            <div class="chat-header" id="chat-header-node" style="display: none;">
+                <div class="chat-header-left">
+                    <div class="back-btn" onclick="UI.closeChat()"><i class="fa-solid fa-arrow-left"></i></div>
+                    <div class="avatar" id="header-avatar"></div>
+                    <div class="chat-header-info">
+                        <div class="chat-header-title" id="header-name"></div>
+                        <div class="chat-header-status" id="header-status">online</div>
+                    </div>
+                </div>
+                <div class="chat-header-actions">
+                    <div class="menu-btn" onclick="UI.toggleChatMenu(event)"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+                </div>
+            </div>
+
+            <div class="chat-body" id="chat-body-node">
+                <div class="no-chat-selected" id="fallback-node">
+                    <div class="no-chat-bubble">Select a chat to start messaging</div>
+                </div>
+            </div>
+
+            <div class="chat-input-area" id="chat-input-node" style="display: none;">
+                <div class="input-wrapper">
+                    <div class="input-action-btn emoji-picker-btn" onclick="UI.toggleEmojiPicker(event)">
+                        <i class="fa-regular fa-face-smile"></i>
+                        <div class="emoji-popover" id="emoji-popover-node"></div>
+                    </div>
+                    <textarea id="msg-input" class="chat-input" placeholder="Message" rows="1" oninput="UI.autoGrow(this)" onkeydown="UI.handleTextareaKey(event)"></textarea>
+                    <div class="input-action-btn" onclick="UI.triggerMediaUpload()"><i class="fa-solid fa-paperclip"></i></div>
+                </div>
+                <div class="send-btn" onclick="App.sendMessage()"><i class="fa-solid fa-paper-plane"></i></div>
+            </div>
+        </div>
+
+        <div class="drawer-backdrop" id="drawer-backdrop" onclick="UI.toggleDrawer(false)"></div>
+        <div class="drawer" id="app-drawer">
+            <div class="drawer-header">
+                <div class="avatar" id="drawer-avatar-node" style="width: 64px; height: 64px; font-size: 24px;"></div>
+                <div class="drawer-user-info">
+                    <div class="drawer-name" id="drawer-name-node"></div>
+                    <div class="drawer-email" id="drawer-email-node"></div>
+                </div>
+            </div>
+            <div style="flex:1; overflow-y:auto; padding: 8px 0;">
+                <div class="drawer-menu-item" onclick="UI.openProfileModal()"><i class="fa-regular fa-user"></i> Edit Profile</div>
+                <div class="drawer-menu-item" onclick="UI.toggleTheme()"><i class="fa-regular fa-moon"></i> Dark Mode</div>
+                <div class="drawer-menu-item" onclick="UI.openClearChatsModal()"><i class="fa-regular fa-trash-can"></i> Clear All Chats</div>
+                <hr style="border: none; border-top: 1px solid var(--tg-border); margin: 8px 0;">
+                <div class="drawer-menu-item" style="color: #ff4d4d;" onclick="Auth.logout()"><i class="fa-solid fa-right-from-bracket" style="color: #ff4d4d;"></i> Log Out</div>
+            </div>
+        </div>
+
+        <div class="modal" id="profile-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Edit Profile</div>
+                    <div class="modal-close" onclick="UI.closeModal('profile-modal')"><i class="fa-solid fa-xmark"></i></div>
+                </div>
+                <div class="modal-body">
+                    <div class="profile-upload-container">
+                        <div class="avatar-edit-wrapper" onclick="UI.triggerAvatarUpload()">
+                            <div class="avatar" id="modal-avatar-preview" style="width: 80px; height: 80px; font-size: 32px;"></div>
+                            <div class="avatar-edit-overlay"><i class="fa-solid fa-camera"></i></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="edit-username" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Bio / About</label>
+                        <input type="text" id="edit-bio" class="form-input" placeholder="Bio description...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="tg-btn tg-btn-link" onclick="UI.closeModal('profile-modal')">Cancel</button>
+                    <button class="tg-btn tg-btn-primary" onclick="App.saveProfileChanges()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <input type="file" id="file-input" accept="image/*" onchange="UI.handleAvatarFile(event)">
+        <input type="file" id="media-input" accept="image/*" onchange="UI.handleMediaFile(event)">
+
+        <div class="context-menu" id="msg-context-menu">
+            <div class="context-menu-item" onclick="App.deleteSelectedMessage()"><i class="fa-regular fa-trash-can"></i> Delete Message</div>
+        </div>
+
+        <div class="context-menu" id="chat-header-menu">
+            <div class="context-menu-item" onclick="App.clearCurrentChat()"><i class="fa-regular fa-circle-xmark"></i> Clear Chat History</div>
+        </div>
+
+    </div>
+
+    <script>
+        const INITIAL_BOTS = [
+            { id: "gemini_ai", username: "Gemini AI", email: "gemini@ai.assistant", bio: "Your smart AI buddy powered by Gemini technology.", avatar: "", isBot: true, status: "bot" }
+        ];
+
+        const EMOJIS = ["😀", "😂", "🥰", "👍", "🔥", "🎉", "❤️", "🙌", "😭", "😮", "🙏", "✨"];
+
+        const Storage = {
+            getUsers: () => JSON.parse(localStorage.getItem('tg_users')) || [],
+            setUsers: (users) => localStorage.setItem('tg_users', JSON.stringify(users)),
+            getMessages: () => JSON.parse(localStorage.getItem('tg_messages')) || [],
+            setMessages: (msgs) => localStorage.setItem('tg_messages', JSON.stringify(msgs)),
+            getSession: () => JSON.parse(localStorage.getItem('tg_session')) || null,
+            setSession: (session) => localStorage.setItem('tg_session', JSON.stringify(session)),
+            getTheme: () => localStorage.getItem('tg_theme') || 'dark',
+            setTheme: (theme) => localStorage.setItem('tg_theme', theme)
+        };
+
+        let currentUser = null;
+        let activeChatUserId = null;
+        let selectedMessageId = null;
+
+        const Auth = {
+            toggleView: (showLogin) => {
+                document.getElementById('auth-view-login').style.display = showLogin ? 'block' : 'none';
+                document.getElementById('auth-view-register').style.display = showLogin ? 'none' : 'block';
+            },
+            init: () => {
+                const session = Storage.getSession();
+                if (session) {
+                    currentUser = session;
+                    document.getElementById('auth-screen').style.display = 'none';
+                    App.initDashboard();
+                }
+            },
+            register: () => {
+                const userNode = document.getElementById('reg-username').value.trim();
+                const emailNode = document.getElementById('reg-email').value.trim();
+                const passNode = document.getElementById('reg-password').value.trim();
+
+                if (!userNode || !emailNode || !passNode) return alert('Fill out all inputs.');
+                
+                let users = Storage.getUsers();
+                if (users.some(u => u.email.toLowerCase() === emailNode.toLowerCase())) {
+                    return alert('Email address registered already.');
+                }
+
+                const newUser = {
+                    id: 'u_' + Date.now(),
+                    username: userNode,
+                    email: emailNode,
+                    password: passNode,
+                    bio: 'Hey there! I am using Telegram.',
+                    avatar: '',
+                    isBot: false,
+                    status: 'online'
+                };
+
+                users.push(newUser);
+                Storage.setUsers(users);
+                currentUser = newUser;
+                Storage.setSession(newUser);
+                
+                document.getElementById('auth-screen').style.display = 'none';
+                App.initDashboard();
+            },
+            login: () => {
+                const emailNode = document.getElementById('login-email').value.trim();
+                const passNode = document.getElementById('login-password').value.trim();
+
+                if (!emailNode || !passNode) return alert('Fill out all fields.');
+
+                const users = Storage.getUsers();
+                const user = users.find(u => u.email.toLowerCase() === emailNode.toLowerCase() && u.password === passNode);
+
+                if (!user) return alert('Invalid email or password parameters.');
+
+                currentUser = user;
+                Storage.setSession(user);
+                document.getElementById('auth-screen').style.display = 'none';
+                App.initDashboard();
+            },
+            logout: () => {
+                localStorage.removeItem('tg_session');
+                location.reload();
+            }
+        };
+
+        const App = {
+            initDashboard: () => {
+                UI.applyTheme(Storage.getTheme());
+                UI.buildEmojiPicker();
+                App.syncUserDatabaseWithBots();
+                App.renderUserList();
+                UI.updateDrawerInfo();
+                
+                setInterval(() => {
+                    if (activeChatUserId) App.renderMessages(false);
+                }, 3000);
+
+                window.addEventListener('click', () => {
+                    document.getElementById('msg-context-menu').style.display = 'none';
+                    document.getElementById('chat-header-menu').style.display = 'none';
+                });
+            },
+            syncUserDatabaseWithBots: () => {
+                let users = Storage.getUsers();
+                INITIAL_BOTS.forEach(bot => {
+                    if (!users.some(u => u.id === bot.id)) {
+                        users.push(bot);
+                    }
+                });
+                Storage.setUsers(users);
+            },
+            renderUserList: () => {
+                const query = document.getElementById('user-search').value.toLowerCase();
+                const users = Storage.getUsers().filter(u => u.id !== currentUser.id);
+                const allMessages = Storage.getMessages();
+                const target = document.getElementById('contacts-target');
+                target.innerHTML = '';
+
+                const filtered = users.filter(u => u.username.toLowerCase().includes(query));
+
+                filtered.forEach(u => {
+                    const threadMsgs = allMessages.filter(m => 
+                        (m.senderId === currentUser.id && m.receiverId === u.id) ||
+                        (m.senderId === u.id && m.receiverId === currentUser.id)
+                    );
+                    
+                    let lastMsgText = u.bio || 'No status bio';
+                    let lastMsgTime = '';
+                    
+                    if (threadMsgs.length > 0) {
+                        const lastM = threadMsgs[threadMsgs.length - 1];
+                        lastMsgText = lastM.mediaType === 'image' ? '🖼️ Photo' : lastM.text;
+                        lastMsgTime = lastM.time;
+                    }
+
+                    const item = document.createElement('div');
+                    item.className = `chat-item ${activeChatUserId === u.id ? 'active' : ''}`;
+                    item.onclick = () => App.selectChat(u.id);
+
+                    const avatarMarkup = UI.getAvatarMarkup(u);
+
+                    item.innerHTML = `
+                        ${avatarMarkup}
+                        <div class="chat-item-body">
+                            <div class="chat-item-header">
+                                <span class="chat-item-name">${u.username}</span>
+                                <span class="chat-item-time">${lastMsgTime}</span>
+                            </div>
+                            <div class="chat-item-msg">${lastMsgText}</div>
+                        </div>
+                    `;
+                    target.appendChild(item);
+                });
+            },
+            selectChat: (userId) => {
+                activeChatUserId = userId;
+                document.getElementById('app-viewport').classList.add('chat-open');
+                
+                const users = Storage.getUsers();
+                const counterpart = users.find(u => u.id === userId);
+                
+                const headerNode = document.getElementById('chat-header-node');
+                const inputNode = document.getElementById('chat-input-node');
+                
+                headerNode.style.display = 'flex';
+                inputNode.style.display = 'flex';
+
+                document.getElementById('header-name').innerText = counterpart.username;
+                document.getElementById('header-status').innerText = counterpart.isBot ? 'bot assistant' : counterpart.status || 'online';
+                
+                const headAvContainer = document.getElementById('header-avatar');
+                headAvContainer.className = `avatar ${counterpart.status === 'online' && !counterpart.isBot ? 'online' : ''}`;
+                headAvContainer.style.background = counterpart.avatar ? 'none' : 'var(--tg-primary)';
+                headAvContainer.innerHTML = counterpart.avatar ? `<img src="${counterpart.avatar}" class="avatar">` : UI.getInitials(counterpart.username);
+
+                App.renderUserList();
+                App.renderMessages(true);
+            },
+            renderMessages: (shouldScroll) => {
+                if (!activeChatUserId) return;
+                const bodyNode = document.getElementById('chat-body-node');
+                const allMessages = Storage.getMessages();
+                
+                const threadMsgs = allMessages.filter(m => 
+                    (m.senderId === currentUser.id && m.receiverId === activeChatUserId) ||
+                    (m.senderId === activeChatUserId && m.receiverId === currentUser.id)
+                );
+
+                const currentHTML = bodyNode.innerHTML;
+                let newHTML = '';
+
+                if (threadMsgs.length === 0) {
+                    newHTML = `<div class="no-chat-selected"><div class="no-chat-bubble">No messages here yet. Say hello!</div></div>`;
+                } else {
+                    threadMsgs.forEach(m => {
+                        const isOut = m.senderId === currentUser.id;
+                        let contentMarkup = `<span class="message-text">${UI.escapeHTML(m.text)}</span>`;
+                        if (m.mediaType === 'image') {
+                            contentMarkup = `<div class="message-media"><img src="${m.mediaData}"></div>` + (m.text ? `<span class="message-text">${UI.escapeHTML(m.text)}</span>` : '');
+                        }
+
+                        newHTML += `
+                            <div class="message-row ${isOut ? 'out' : 'in'}">
+                                <div class="message-bubble" data-msg-id="${m.id}">
+                                    <div class="message-actions" onclick="UI.showMsgContextMenu(event, '${m.id}')"><i class="fa-solid fa-angle-down"></i></div>
+                                    ${contentMarkup}
+                                    <div class="message-footer">
+                                        <span>${m.time}</span>
+                                        ${isOut ? '<i class="fa-solid fa-check-double" style="font-size:10px; color:#55aaff;"></i>' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                if (bodyNode.querySelector('.typing-indicator')) {
+                    newHTML += `
+                        <div class="message-row in" id="typing-row">
+                            <div class="typing-indicator">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (currentHTML !== newHTML) {
+                    const cachedTyping = bodyNode.querySelector('#typing-row');
+                    bodyNode.innerHTML = newHTML;
+                    if (cachedTyping && !bodyNode.querySelector('#typing-row')) {
+                        bodyNode.appendChild(cachedTyping);
+                    }
+                    if (shouldScroll) UI.scrollToBottom();
+                }
+            },
+            sendMessage: () => {
+                const input = document.getElementById('msg-input');
+                const text = input.value.trim();
+                if (!text) return;
+
+                App.commitMessageRecord(text, null, null);
+                input.value = '';
+                UI.autoGrow(input);
+                App.renderMessages(true);
+                App.renderUserList();
+
+                if (activeChatUserId === 'gemini_ai') {
+                    App.triggerBotResponseResponse(text);
+                }
+            },
+            commitMessageRecord: (text, mediaType, mediaData) => {
+                const allMessages = Storage.getMessages();
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                
+                const newMsg = {
+                    id: 'm_' + Date.now() + Math.random().toString(36).substr(2, 4),
+                    senderId: currentUser.id,
+                    receiverId: activeChatUserId,
+                    text: text,
+                    mediaType: mediaType,
+                    mediaData: mediaData,
+                    time: timeString
+                };
+
+                allMessages.push(newMsg);
+                Storage.setMessages(allMessages);
+            },
+            triggerBotResponseResponse: (userPrompt) => {
+                UI.showTypingIndicator(true);
+                
+                setTimeout(() => {
+                    UI.showTypingIndicator(false);
+                    const allMessages = Storage.getMessages();
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                    
+                    let replyText = `I received your message: "${userPrompt}". This is a client-side Gemini AI placeholder response. To enable full AI automation, connect this to the live Gemini API endpoint.`;
+                    
+                    const botMsg = {
+                        id: 'm_' + Date.now(),
+                        senderId: 'gemini_ai',
+                        receiverId: currentUser.id,
+                        text: replyText,
+                        mediaType: null,
+                        mediaData: null,
+                        time: timeString
+                    };
+
+                    allMessages.push(botMsg);
+                    Storage.setMessages(allMessages);
+                    App.renderMessages(true);
+                    App.renderUserList();
+                }, 1500);
+            },
+            deleteSelectedMessage: () => {
+                if (!selectedMessageId) return;
+                let allMessages = Storage.getMessages();
+                allMessages = allMessages.filter(m => m.id !== selectedMessageId);
+                Storage.setMessages(allMessages);
+                App.renderMessages(false);
+                App.renderUserList();
+            },
+            clearCurrentChat: () => {
+                if (!activeChatUserId) return;
+                let allMessages = Storage.getMessages();
+                allMessages = allMessages.filter(m => 
+                    !((m.senderId === currentUser.id && m.receiverId === activeChatUserId) ||
+                      (m.senderId === activeChatUserId && m.receiverId === currentUser.id))
+                );
+                Storage.setMessages(allMessages);
+                App.renderMessages(true);
+                App.renderUserList();
+            },
+            saveProfileChanges: () => {
+                const nextUser = document.getElementById('edit-username').value.trim();
+                const nextBio = document.getElementById('edit-bio').value.trim();
+                
+                if (!nextUser) return alert('Username cannot be blank.');
+
+                let users = Storage.getUsers();
+                const index = users.findIndex(u => u.id === currentUser.id);
+                
+                if (index !== -1) {
+                    users[index].username = nextUser;
+                    users[index].bio = nextBio;
+                    
+                    const modalAv = document.getElementById('modal-avatar-preview');
+                    const imgNode = modalAv.querySelector('img');
+                    if (imgNode) {
+                        users[index].avatar = imgNode.src;
+                    }
+
+                    currentUser = users[index];
+                    Storage.setUsers(users);
+                    Storage.setSession(currentUser);
+                    
+                    UI.updateDrawerInfo();
+                    UI.closeModal('profile-modal');
+                    App.renderUserList();
+                    if (activeChatUserId) App.selectChat(activeChatUserId);
+                }
+            }
+        };
+
+        const UI = {
+            getInitials: (name) => name ? name.charAt(0).toUpperCase() : 'U',
+            getAvatarMarkup: (user) => {
+                const stateClass = user.status === 'online' && !user.isBot ? 'online' : '';
+                if (user.avatar) {
+                    return `<div class="avatar ${stateClass}"><img src="${user.avatar}" class="avatar"></div>`;
+                }
+                return `<div class="avatar ${stateClass}" style="background: var(--tg-primary);">${UI.getInitials(user.username)}</div>`;
+            },
+            closeChat: () => {
+                activeChatUserId = null;
+                document.getElementById('app-viewport').classList.remove('chat-open');
+                App.renderUserList();
+            },
+            autoGrow: (element) => {
+                element.style.height = "24px";
+                element.style.height = (element.scrollHeight - 12) + "px";
+            },
+            handleTextareaKey: (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    App.sendMessage();
+                }
+            },
+            scrollToBottom: () => {
+                const bodyNode = document.getElementById('chat-body-node');
+                bodyNode.scrollTop = bodyNode.scrollHeight;
+            },
+            toggleDrawer: (open) => {
+                document.getElementById('app-drawer').classList.toggle('open', open);
+                document.getElementById('drawer-backdrop').classList.toggle('open', open);
+            },
+            updateDrawerInfo: () => {
+                document.getElementById('drawer-name-node').innerText = currentUser.username;
+                document.getElementById('drawer-email-node').innerText = currentUser.email;
+                const dAv = document.getElementById('drawer-avatar-node');
+                dAv.style.background = currentUser.avatar ? 'none' : 'var(--tg-primary)';
+                dAv.innerHTML = currentUser.avatar ? `<img src="${currentUser.avatar}" class="avatar" style="width:64px; height:64px;">` : UI.getInitials(currentUser.username);
+            },
+            toggleTheme: () => {
+                const current = Storage.getTheme();
+                const target = current === 'dark' ? 'light' : 'dark';
+                UI.applyTheme(target);
+            },
+            applyTheme: (theme) => {
+                document.documentElement.setAttribute('data-theme', theme);
+                Storage.setTheme(theme);
+                const darkMenuNode = document.querySelector('.drawer-menu-item i.fa-moon');
+                if (darkMenuNode) {
+                    darkMenuNode.parentElement.innerHTML = theme === 'dark' ? '<i class="fa-regular fa-sun"></i> Light Mode' : '<i class="fa-regular fa-moon"></i> Dark Mode';
+                }
+            },
+            openProfileModal: () => {
+                UI.toggleDrawer(false);
+                document.getElementById('edit-username').value = currentUser.username;
+                document.getElementById('edit-bio').value = currentUser.bio || '';
+                const mAv = document.getElementById('modal-avatar-preview');
+                mAv.style.background = currentUser.avatar ? 'none' : 'var(--tg-primary)';
+                mAv.innerHTML = currentUser.avatar ? `<img src="${currentUser.avatar}" class="avatar" style="width:80px; height:80px;">` : UI.getInitials(currentUser.username);
+                document.getElementById('profile-modal').classList.add('open');
+            },
+            closeModal: (id) => {
+                document.getElementById(id).classList.remove('open');
+            },
+            openClearChatsModal: () => {
+                UI.toggleDrawer(false);
+                if (confirm('Are you sure you want to delete all conversation message logs?')) {
+                    Storage.setMessages([]);
+                    App.renderMessages(true);
+                    App.renderUserList();
+                    alert('All chat logs cleared.');
+                }
+            },
+            triggerAvatarUpload: () => document.getElementById('file-input').click(),
+            handleAvatarFile: (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const mAv = document.getElementById('modal-avatar-preview');
+                    mAv.style.background = 'none';
+                    mAv.innerHTML = `<img src="${reader.result}" class="avatar" style="width:80px; height:80px;">`;
+                }
+                reader.readAsDataURL(file);
+            },
+            triggerMediaUpload: () => document.getElementById('media-input').click(),
+            handleMediaFile: (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    App.commitMessageRecord("", "image", reader.result);
+                    App.renderMessages(true);
+                    App.renderUserList();
+                    if (activeChatUserId === 'gemini_ai') {
+                        App.triggerBotResponseResponse("Sent an image asset.");
+                    }
+                }
+                reader.readAsDataURL(file);
+            },
+            buildEmojiPicker: () => {
+                const popover = document.getElementById('emoji-popover-node');
+                popover.innerHTML = '';
+                EMOJIS.forEach(emo => {
+                    const span = document.createElement('span');
+                    span.className = 'emoji-item';
+                    span.innerText = emo;
+                    span.onclick = (e) => {
+                        e.stopPropagation();
+                        const input = document.getElementById('msg-input');
+                        input.value += emo;
+                        popover.classList.remove('open');
+                        input.focus();
+                    };
+                    popover.appendChild(span);
+                });
+            },
+            toggleEmojiPicker: (e) => {
+                e.stopPropagation();
+                document.getElementById('emoji-popover-node').classList.toggle('open');
+            },
+            showMsgContextMenu: (e, msgId) => {
+                e.stopPropagation();
+                selectedMessageId = msgId;
+                const menu = document.getElementById('msg-context-menu');
+                menu.style.top = `${e.clientY}px`;
+                menu.style.left = `${e.clientX - 120}px`;
+                menu.style.display = 'block';
+            },
+            toggleChatMenu: (e) => {
+                e.stopPropagation();
+                const menu = document.getElementById('chat-header-menu');
+                menu.style.top = `${e.clientY + 15}px`;
+                menu.style.left = `${e.clientX - 160}px`;
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            },
+            showTypingIndicator: (show) => {
+                const bodyNode = document.getElementById('chat-body-node');
+                const exists = document.getElementById('typing-row');
+                
+                if (show && !exists) {
+                    const row = document.createElement('div');
+                    row.className = 'message-row in';
+                    row.id = 'typing-row';
+                    row.innerHTML = `
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    `;
+                    bodyNode.appendChild(row);
+                    UI.scrollToBottom();
+                } else if (!show && exists) {
+                    exists.remove();
+                }
+            },
+            escapeHTML: (str) => {
+                return str.replace(/[&<>'"]/g, 
+                    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+                );
+            }
+        };
+
+        window.onload = () => {
+            Auth.init();
+            window.addEventListener('click', () => {
+                document.getElementById('emoji-popover-node').classList.remove('open');
+            });
+        };
+    </script>
+</body>
+</html>
